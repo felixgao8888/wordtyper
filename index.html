@@ -1577,7 +1577,7 @@
     <span class="license-icon">⏳</span>
     <span class="license-text">未激活 · 免费体验120秒</span>
   </div>
-  <div class="version-badge" id="versionBadge">v1.8.0</div>
+  <div class="version-badge" id="versionBadge">v2.0.0</div>
   <div class="panel">
     <div class="step-indicator">
       <span class="step-dot active" id="stepDot1">1</span>
@@ -1589,11 +1589,7 @@
     <div class="menu-step" id="menuStep1">
       <div class="panel-title">选择学段</div>
       <div class="level-row" id="levelRow">
-        <button class="level-btn selected" data-level="primary">🏫 小学</button>
-        <button class="level-btn" data-level="junior">📚 初中</button>
-        <button class="level-btn" data-level="senior">🎓 高中</button>
-        <button class="level-btn" data-level="cet4">🏛️ 四级</button>
-        <button class="level-btn" data-level="cet6">🏆 六级</button>
+        <!-- 学段按钮由JavaScript动态生成 -->
       </div>
       <div class="panel-title">选择模式</div>
       <div class="mode-select" id="modeSelect">
@@ -1772,7 +1768,7 @@
       <div class="pay-panel" id="payQrPanel">
         <div class="activation-qr">
           <div class="qr-box" id="payQrBox">
-            <img src="https://aka.doubaocdn.com/s/mkEz2U6k5m" alt="扫码支付" class="qr-img" id="payQrImg">
+            <img src="https://aka.doubaocdn.com/s/P6MHzWeP3J" alt="扫码支付" class="qr-img" id="payQrImg">
             <div class="pay-loading" id="payLoading" style="display:none;">生成二维码中...</div>
           </div>
           <div class="qr-price">💰 永久激活 ¥9.6</div>
@@ -1810,6 +1806,14 @@
       <div class="upgrade-subtitle">导入扩展词汇包，解锁更多单词内容</div>
     </div>
     <div class="upgrade-body">
+      <div class="upgrade-section" style="background:linear-gradient(135deg,#fff3cd,#ffeaa7);padding:14px;border-radius:12px;border:2px solid #f0c040;">
+        <div style="font-weight:700;color:#856404;font-size:14px;margin-bottom:6px;">🎁 推荐词库包</div>
+        <div style="font-size:13px;color:#856404;line-height:1.6;">
+          <b>Oxford 5000 牛津核心词汇包</b> - 4949个牛津大学推荐核心词汇，按词频分级（A1-C1），含中文释义和emoji图标。<br>
+          <span style="font-weight:700;color:#d63031;">💰 价格：¥4.99（永久使用）</span>
+        </div>
+        <button class="btn btn-primary" style="margin-top:10px;font-size:13px;padding:6px 16px;" onclick="alert('请在下方导入Oxford5000词库升级包JSON文件，系统会自动弹出付费窗口')">📦 了解详情</button>
+      </div>
       <div class="upgrade-section">
         <div class="upgrade-section-title">📥 导入升级包</div>
         <div class="upgrade-import-area">
@@ -1841,6 +1845,37 @@
       </div>
     </div>
     <button class="upgrade-close" id="upgradeClose">关闭</button>
+  </div>
+</div>
+
+<!-- 词库包付费弹窗 -->
+<div class="activation-overlay hidden" id="packagePayOverlay">
+  <div class="activation-panel">
+    <div class="activation-header">
+      <div class="activation-icon">📦</div>
+      <div class="activation-title" id="packagePayTitle">Oxford 5000 牛津核心词汇包</div>
+      <div class="activation-subtitle">付费词库包，购买后永久使用</div>
+    </div>
+    <div class="activation-body">
+      <div class="pay-panel" id="packagePayQrPanel">
+        <div class="activation-qr">
+          <div class="qr-box">
+            <img src="https://aka.doubaocdn.com/s/P6MHzWeP3J" alt="扫码支付" class="qr-img">
+          </div>
+          <div class="qr-price" id="packagePayPrice">💰 ¥4.99</div>
+          <div class="qr-hint">微信/支付宝扫码支付<br>支付成功后点击下方按钮完成购买</div>
+          <div class="pay-type-select">
+            <button class="pay-type-btn active" data-type="wechat">💚 微信</button>
+            <button class="pay-type-btn" data-type="alipay">💙 支付宝</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="activation-features">
+      <span>✅ 4949个核心词汇</span><span>✅ 中文释义</span><span>✅ emoji图标</span><span>✅ 永久使用</span>
+    </div>
+    <button class="btn btn-primary btn-lg" id="packagePayCompleteBtn" style="margin-top:16px;width:100%;">✅ 我已支付，完成购买</button>
+    <button class="activation-close" id="packagePayClose">稍后再说</button>
   </div>
 </div>
 
@@ -4681,7 +4716,7 @@ function initPayTabs() {
 async function createPayOrder() {
   if (!BACKEND_URL) {
     // 未配置后端，显示静态收款码
-    $('payQrImg').src = 'https://aka.doubaocdn.com/s/mkEz2U6k5m';
+    $('payQrImg').src = 'https://aka.doubaocdn.com/s/P6MHzWeP3J';
     $('payStatus').textContent = '⚠️ 未配置自动支付，扫码后请联系作者获取激活码';
     $('payStatus').className = 'pay-status error';
     return;
@@ -4773,18 +4808,64 @@ hideActivation = function() {
 
 /* ===================== 词库升级包系统 ===================== */
 const UPGRADE_KEY = 'wordtyper_upgrade_packages';
+const PAID_PACKAGES_KEY = 'wordtyper_paid_packages';
+// 付费词库包配置：包名关键词 -> {price, name}
+const PAID_PACKAGE_CONFIG = {
+  'oxford 5000': { price: 4.99, name: 'Oxford 5000 牛津核心词汇包' },
+  'oxford5000': { price: 4.99, name: 'Oxford 5000 牛津核心词汇包' },
+  '牛津': { price: 4.99, name: 'Oxford 5000 牛津核心词汇包' }
+};
 let upgradePackages = {}; // {id: {packageName, version, words, importedAt}}
+let paidPackages = {}; // {packageKey: {purchasedAt, orderId}}
 
 function loadUpgradePackages() {
   try {
     const raw = localStorage.getItem(UPGRADE_KEY);
     if (raw) upgradePackages = JSON.parse(raw);
   } catch (e) { upgradePackages = {}; }
+  try {
+    const paidRaw = localStorage.getItem(PAID_PACKAGES_KEY);
+    if (paidRaw) paidPackages = JSON.parse(paidRaw);
+  } catch (e) { paidPackages = {}; }
   applyAllUpgrades();
 }
 
 function saveUpgradePackages() {
   try { localStorage.setItem(UPGRADE_KEY, JSON.stringify(upgradePackages)); } catch (e) {}
+}
+
+function savePaidPackages() {
+  try { localStorage.setItem(PAID_PACKAGES_KEY, JSON.stringify(paidPackages)); } catch (e) {}
+}
+
+// 检测词库包是否需要付费
+function checkPackagePaid(packageName) {
+  const nameLower = packageName.toLowerCase();
+  for (const key in PAID_PACKAGE_CONFIG) {
+    if (nameLower.includes(key.toLowerCase())) {
+      const config = PAID_PACKAGE_CONFIG[key];
+      // 检查是否已购买
+      if (paidPackages[key]) return { paid: true, config };
+      return { paid: false, config };
+    }
+  }
+  return { paid: true, config: null }; // 免费包
+}
+
+// 标记词库包为已购买
+function markPackagePaid(packageName) {
+  const nameLower = packageName.toLowerCase();
+  for (const key in PAID_PACKAGE_CONFIG) {
+    if (nameLower.includes(key.toLowerCase())) {
+      paidPackages[key] = {
+        purchasedAt: new Date().toLocaleString(),
+        orderId: 'PKG_' + Date.now()
+      };
+      savePaidPackages();
+      return true;
+    }
+  }
+  return false;
 }
 
 function applyAllUpgrades() {
@@ -4794,12 +4875,54 @@ function applyAllUpgrades() {
   Object.values(upgradePackages).forEach(pkg => {
     applyUpgradeWords(pkg.words);
   });
+  // 应用升级包后重新渲染学段按钮
+  renderLevelButtons();
+}
+
+// 动态渲染学段按钮
+function renderLevelButtons() {
+  const levelRow = $('levelRow');
+  if (!levelRow) return;
+  const levelKeys = Object.keys(LEVELS);
+  if (levelKeys.length === 0) return;
+  // 保存当前选中的学段
+  const currentLevel = state.level || levelKeys[0];
+  // 生成按钮
+  levelRow.innerHTML = levelKeys.map(key => {
+    const level = LEVELS[key];
+    const isSelected = key === currentLevel ? 'selected' : '';
+    return `<button class="level-btn ${isSelected}" data-level="${key}">${level.icon || '📚'} ${level.name || key}</button>`;
+  }).join('');
+  // 更新state.level
+  if (!state.level || !LEVELS[state.level]) {
+    state.level = levelKeys[0];
+  }
 }
 
 function applyUpgradeWords(words) {
   if (!words || typeof words !== 'object') return;
   for (const levelKey in words) {
-    if (!LEVELS[levelKey]) continue;
+    // 如果学段不存在，自动创建新学段
+    if (!LEVELS[levelKey]) {
+      // 根据学段key生成默认名称和图标
+      const levelNames = {
+        'oxford-basic': { name: '牛津5000', icon: '📘' },
+        'oxford': { name: '牛津词汇', icon: '📘' },
+        'ielts': { name: '雅思词汇', icon: '🌍' },
+        'toefl': { name: '托福词汇', icon: '🌎' },
+        'gre': { name: 'GRE词汇', icon: '🎓' },
+        'gmat': { name: 'GMAT词汇', icon: '📊' },
+        'sat': { name: 'SAT词汇', icon: '📝' },
+        'act': { name: 'ACT词汇', icon: '📋' }
+      };
+      const defaultInfo = levelNames[levelKey] || { name: levelKey, icon: '📚' };
+      LEVELS[levelKey] = {
+        name: defaultInfo.name,
+        icon: defaultInfo.icon,
+        topics: {}
+      };
+      console.log('自动创建新学段:', levelKey, LEVELS[levelKey].name);
+    }
     const levelTopics = words[levelKey];
     for (const topicKey in levelTopics) {
       const topicData = levelTopics[topicKey];
@@ -4807,6 +4930,30 @@ function applyUpgradeWords(words) {
       if (Array.isArray(topicData)) {
         if (LEVELS[levelKey].topics[topicKey]) {
           LEVELS[levelKey].topics[topicKey].words = LEVELS[levelKey].topics[topicKey].words.concat(topicData);
+        } else {
+          // 主题不存在，自动创建新主题
+          // 根据主题名称分配emoji
+          const topicEmojis = {
+            '初级': '🌱', '中级': '🌿', '高级': '🌳',
+            'a1': '🌱', 'a2': '🌱', 'b1': '🌿', 'b2': '🌿', 'c1': '🌳', 'c2': '🌳',
+            '动物': '🐾', '水果': '🍎', '食物': '🍔', '颜色': '🎨', '数字': '🔢',
+            '家庭': '👨‍👩‍👧', '身体': '🧍', '衣服': '👕', '天气': '☀️', '时间': '⏰',
+            '学校': '🏫', '工作': '💼', '运动': '⚽', '音乐': '🎵', '旅行': '✈️'
+          };
+          let topicEmoji = '📚';
+          const topicKeyLower = topicKey.toLowerCase();
+          for (const key in topicEmojis) {
+            if (topicKeyLower.includes(key.toLowerCase())) {
+              topicEmoji = topicEmojis[key];
+              break;
+            }
+          }
+          LEVELS[levelKey].topics[topicKey] = {
+            name: topicKey,
+            emoji: topicEmoji,
+            words: topicData
+          };
+          console.log('自动创建新主题:', topicKey, '单词数:', topicData.length);
         }
       }
       // 模式2：新增主题（对象格式 {name, emoji, words}）
@@ -4832,8 +4979,22 @@ function importUpgradePackage(jsonStr) {
     if (!pkg.words || typeof pkg.words !== 'object') {
       return { success: false, msg: '升级包格式错误：缺少words字段' };
     }
-    const id = 'pkg_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7);
     const packageName = pkg.packageName || ('升级包_' + new Date().toLocaleDateString());
+    
+    // 检测是否是付费包
+    const paidCheck = checkPackagePaid(packageName);
+    if (!paidCheck.paid && paidCheck.config) {
+      // 是付费包且未购买，暂存待购买的包数据，显示付费弹窗
+      pendingPaidPackage = {
+        jsonStr,
+        packageName,
+        config: paidCheck.config
+      };
+      showPackagePayment(paidCheck.config);
+      return { success: false, msg: 'need_payment', needPayment: true, config: paidCheck.config };
+    }
+    
+    const id = 'pkg_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7);
     // 统计单词数
     let wordCount = 0;
     for (const lk in pkg.words) {
@@ -4853,10 +5014,50 @@ function importUpgradePackage(jsonStr) {
     };
     saveUpgradePackages();
     applyUpgradeWords(pkg.words);
+    renderLevelButtons(); // 重新渲染学段按钮，显示新增的学段
     return { success: true, msg: `成功导入「${packageName}」，新增${wordCount}个单词`, id };
   } catch (e) {
     return { success: false, msg: 'JSON解析失败：' + e.message };
   }
+}
+
+// 待购买的付费包数据
+let pendingPaidPackage = null;
+
+// 显示词库包付费弹窗
+function showPackagePayment(config) {
+  const overlay = $('packagePayOverlay');
+  if (!overlay) return;
+  $('packagePayTitle').textContent = config.name;
+  $('packagePayPrice').textContent = '¥' + config.price;
+  overlay.classList.remove('hidden');
+}
+
+function hidePackagePayment() {
+  $('packagePayOverlay').classList.add('hidden');
+  pendingPaidPackage = null;
+}
+
+// 完成付费包购买（模拟支付成功）
+function completePackagePayment() {
+  if (!pendingPaidPackage) return;
+  // 标记为已购买
+  markPackagePaid(pendingPaidPackage.packageName);
+  // 实际导入包
+  const result = importUpgradePackage(pendingPaidPackage.jsonStr);
+  hidePackagePayment();
+  if (result.success) {
+    showUpgradeMsg(result.msg, 'success');
+    renderUpgradeList();
+  } else {
+    showUpgradeMsg(result.msg, 'error');
+  }
+}
+
+function showUpgradeMsg(msg, type) {
+  const el = $('upgradeMsg');
+  el.textContent = msg;
+  el.className = 'upgrade-msg ' + (type || '');
 }
 
 function removeUpgradePackage(id) {
@@ -4878,9 +5079,13 @@ function renderUpgradeList() {
   }
   list.innerHTML = ids.map(id => {
     const pkg = upgradePackages[id];
+    // 检测是否是付费包
+    const paidCheck = checkPackagePaid(pkg.packageName);
+    const paidBadge = paidCheck.config ? 
+      `<span style="background:#28a745;color:white;padding:2px 8px;border-radius:10px;font-size:10px;margin-left:6px;">✅ 已购买</span>` : '';
     return `<div class="upgrade-item">
       <div class="upgrade-item-info">
-        <div class="upgrade-item-name">${pkg.packageName} <span style="color:#999;font-weight:400;font-size:11px;">v${pkg.version}</span></div>
+        <div class="upgrade-item-name">${pkg.packageName} <span style="color:#999;font-weight:400;font-size:11px;">v${pkg.version}</span>${paidBadge}</div>
         <div class="upgrade-item-meta">${pkg.wordCount}个单词 · 导入于 ${pkg.importedAt}</div>
       </div>
       <button class="upgrade-item-remove" onclick="removeUpgradePackage('${id}')">移除</button>
@@ -6339,6 +6544,7 @@ function initEvents() {
     document.querySelectorAll('.level-btn').forEach(b => b.classList.remove('selected'));
     btn.classList.add('selected');
     state.level = btn.dataset.level;
+    renderTopics(state.level); // 切换学段时重新渲染主题列表
   });
   $('nextStepBtn').addEventListener('click', () => { goToStep(2); });
   $('prevStepBtn').addEventListener('click', () => { goToStep(1); });
@@ -6528,6 +6734,8 @@ function initEvents() {
     const reader = new FileReader();
     reader.onload = (ev) => {
       const result = importUpgradePackage(ev.target.result);
+      // 如果是需要付费的包，不显示错误消息，付费弹窗已经显示
+      if (result.needPayment) return;
       const msg = $('upgradeMsg');
       msg.textContent = result.msg;
       msg.className = 'upgrade-msg ' + (result.success ? 'success' : 'error');
@@ -6549,6 +6757,8 @@ function initEvents() {
     const text = $('upgradeTextarea').value.trim();
     if (!text) return;
     const result = importUpgradePackage(text);
+    // 如果是需要付费的包，不显示错误消息，付费弹窗已经显示
+    if (result.needPayment) return;
     const msg = $('upgradeMsg');
     msg.textContent = result.msg;
     msg.className = 'upgrade-msg ' + (result.success ? 'success' : 'error');
@@ -6558,6 +6768,9 @@ function initEvents() {
       $('upgradeTextarea').value = '';
     }
   });
+  // 词库包付费弹窗事件
+  $('packagePayClose').addEventListener('click', hidePackagePayment);
+  $('packagePayCompleteBtn').addEventListener('click', completePackagePayment);
   // 客户意见邮箱点击复制
   $('contactEmail').addEventListener('click', () => {
     const email = '39951555@qq.com';
@@ -6644,6 +6857,7 @@ function init() {
   updateBestDisplay();
   addBgDecor('menu');
   loadUpgradePackages();
+  renderLevelButtons(); // 动态渲染学段按钮（包括升级包新增的学段）
   initPayTabs();
   updateLicenseStatus();
   // 激活状态检查：已激活则隐藏计时器相关
