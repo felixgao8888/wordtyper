@@ -5035,11 +5035,19 @@ function renderLevelButtons() {
 
 function applyUpgradeWords(words) {
   if (!words || typeof words !== 'object') return;
-  for (const levelKey in words) {
+  // 牛津5000词库key映射：导入的oxford-basic/oxford合并到内置的oxford5000
+  const keyMap = {
+    'oxford-basic': 'oxford5000',
+    'oxford': 'oxford5000'
+  };
+  for (let levelKey in words) {
+    // 映射key
+    const actualKey = keyMap[levelKey] || levelKey;
     // 如果学段不存在，自动创建新学段
-    if (!LEVELS[levelKey]) {
+    if (!LEVELS[actualKey]) {
       // 根据学段key生成默认名称和图标
       const levelNames = {
+        'oxford5000': { name: '牛津5000', icon: '📘' },
         'oxford-basic': { name: '牛津5000', icon: '📘' },
         'oxford': { name: '牛津词汇', icon: '📘' },
         'ielts': { name: '雅思词汇', icon: '🌍' },
@@ -5049,21 +5057,21 @@ function applyUpgradeWords(words) {
         'sat': { name: 'SAT词汇', icon: '📝' },
         'act': { name: 'ACT词汇', icon: '📋' }
       };
-      const defaultInfo = levelNames[levelKey] || { name: levelKey, icon: '📚' };
-      LEVELS[levelKey] = {
+      const defaultInfo = levelNames[actualKey] || { name: actualKey, icon: '📚' };
+      LEVELS[actualKey] = {
         name: defaultInfo.name,
         icon: defaultInfo.icon,
         topics: {}
       };
-      console.log('自动创建新学段:', levelKey, LEVELS[levelKey].name);
+      console.log('自动创建新学段:', actualKey, LEVELS[actualKey].name);
     }
     const levelTopics = words[levelKey];
     for (const topicKey in levelTopics) {
       const topicData = levelTopics[topicKey];
       // 模式1：追加到现有主题（数组格式）
       if (Array.isArray(topicData)) {
-        if (LEVELS[levelKey].topics[topicKey]) {
-          LEVELS[levelKey].topics[topicKey].words = LEVELS[levelKey].topics[topicKey].words.concat(topicData);
+        if (LEVELS[actualKey].topics[topicKey]) {
+          LEVELS[actualKey].topics[topicKey].words = LEVELS[actualKey].topics[topicKey].words.concat(topicData);
         } else {
           // 主题不存在，自动创建新主题
           // 根据主题名称分配emoji
@@ -5082,7 +5090,7 @@ function applyUpgradeWords(words) {
               break;
             }
           }
-          LEVELS[levelKey].topics[topicKey] = {
+          LEVELS[actualKey].topics[topicKey] = {
             name: topicKey,
             emoji: topicEmoji,
             words: topicData
@@ -5092,15 +5100,15 @@ function applyUpgradeWords(words) {
       }
       // 模式2：新增主题（对象格式 {name, emoji, words}）
       else if (topicData && typeof topicData === 'object' && Array.isArray(topicData.words)) {
-        if (!LEVELS[levelKey].topics[topicKey]) {
-          LEVELS[levelKey].topics[topicKey] = {
+        if (!LEVELS[actualKey].topics[topicKey]) {
+          LEVELS[actualKey].topics[topicKey] = {
             name: topicData.name || topicKey,
             emoji: topicData.emoji || '📚',
             words: topicData.words
           };
         } else {
           // 主题已存在，追加单词
-          LEVELS[levelKey].topics[topicKey].words = LEVELS[levelKey].topics[topicKey].words.concat(topicData.words);
+          LEVELS[actualKey].topics[topicKey].words = LEVELS[actualKey].topics[topicKey].words.concat(topicData.words);
         }
       }
     }
