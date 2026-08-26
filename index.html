@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -4368,6 +4368,10 @@ function isOxford5000Paid() {
 
 // 应用内置牛津5000词库到LEVELS
 function applyBuiltinOxford5000() {
+  // 先清除已有的牛津5000主题（避免和导入的重复，确保只显示内置的3个组别）
+  if (LEVELS['oxford5000']) {
+    LEVELS['oxford5000'].topics = {};
+  }
   if (!LEVELS['oxford5000']) {
     LEVELS['oxford5000'] = {
       name: '牛津5000',
@@ -4376,15 +4380,13 @@ function applyBuiltinOxford5000() {
       topics: {}
     };
   }
-  // 复制词库数据
+  // 复制词库数据（直接覆盖，不判断是否存在）
   for (const topicKey in BUILTIN_OXFORD5000.oxford5000.topics) {
-    if (!LEVELS['oxford5000'].topics[topicKey]) {
-      LEVELS['oxford5000'].topics[topicKey] = {
-        name: BUILTIN_OXFORD5000.oxford5000.topics[topicKey].name,
-        emoji: BUILTIN_OXFORD5000.oxford5000.topics[topicKey].emoji,
-        words: JSON.parse(JSON.stringify(BUILTIN_OXFORD5000.oxford5000.topics[topicKey].words))
-      };
-    }
+    LEVELS['oxford5000'].topics[topicKey] = {
+      name: BUILTIN_OXFORD5000.oxford5000.topics[topicKey].name,
+      emoji: BUILTIN_OXFORD5000.oxford5000.topics[topicKey].emoji,
+      words: JSON.parse(JSON.stringify(BUILTIN_OXFORD5000.oxford5000.topics[topicKey].words))
+    };
   }
   // 更新锁定状态
   LEVELS['oxford5000'].locked = !isOxford5000Paid();
