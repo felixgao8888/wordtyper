@@ -1,0 +1,23 @@
+[build]
+  publish = "."
+  functions = "netlify/functions"
+
+[[redirects]]
+  from = "/api/pay/create"
+  to = "/.netlify/functions/create-order"
+  status = 200
+
+[[redirects]]
+  from = "/api/pay/query"
+  to = "/.netlify/functions/query-order"
+  status = 200
+
+[[redirects]]
+  from = "/api/pay/callback"
+  to = "/.netlify/functions/pay-callback"
+  status = 200
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

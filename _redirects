@@ -1,0 +1,8 @@
+# Netlify重定向规则
+# 将API请求重定向到Netlify Functions
+/api/pay/create    /.netlify/functions/create-order    200
+/api/pay/query     /.netlify/functions/query-order     200
+/api/pay/callback  /.netlify/functions/pay-callback    200
+
+# 其他所有请求都返回index.html（SPA路由）
+/*    /index.html    200

@@ -1646,7 +1646,7 @@
     </div>
     <button class="btn btn-lavender" id="leaderboardBtn" style="font-size:15px;padding:8px 20px;">🏆 排行榜</button>
     <button class="btn btn-lavender" id="upgradeBtn" style="font-size:15px;padding:8px 20px;">📦 词库升级包管理</button>
-    <a class="btn btn-primary" id="downloadBtn" href="https://aka.doubaocdn.com/s/g6grZvm7fD" download="WordTyper_v2.1.0_桌面版.zip" style="font-size:15px;padding:8px 20px;text-decoration:none;display:inline-block;">💻 下载电脑版 v2.1.0（免安装）</a>
+    <a class="btn btn-primary" id="downloadBtn" href="https://aka.doubaocdn.com/s/ozhqvPVVpW" download="WordTyper_v2.1.0_桌面版.zip" style="font-size:15px;padding:8px 20px;text-decoration:none;display:inline-block;">💻 下载电脑版 v2.1.0（免安装）</a>
   </div>
   <div style="margin-top:10px;text-align:center;">
     <span class="contact-email" id="contactEmail" title="点击复制邮箱">📧 客户意见：39951555@qq.com</span>
@@ -4542,7 +4542,18 @@ const TRIAL_KEY = 'wordtyper_trial_time_v2';
 // ===== 后端激活服务配置 =====
 // 部署后端服务后，将此处改为你的后端地址，例如：'https://your-app.vercel.app'
 // 留空则使用前端本地验证（测试码 DEMO-1234-5678）
-const BACKEND_URL = '';
+const BACKEND_URL = 'auto'; // auto=网页版使用当前域名, 桌面版使用Netlify域名
+const NETLIFY_DOMAIN = 'https://wordtyper-pro.netlify.app';
+
+// 获取API基础地址（自动检测环境）
+function getApiBase() {
+  if (BACKEND_URL === 'auto') {
+    // 检测是否是桌面版（Electron环境）
+    const isDesktop = window.electronAPI || navigator.userAgent.includes('Electron') || window.location.protocol === 'file:';
+    return isDesktop ? NETLIFY_DOMAIN : '';
+  }
+  return BACKEND_URL;
+} // auto=使用当前域名的Netlify Functions
 const DEVICE_ID_KEY = 'wordtyper_device_id';
 
 let trialInterval = null;
@@ -4772,21 +4783,23 @@ function initPayTabs() {
 
 // 创建支付订单
 async function createPayOrder() {
-  if (!BACKEND_URL) {
+  if (!BACKEND_URL || BACKEND_URL === 'disabled') {
     // 未配置后端，显示静态收款码
-    $('payQrImg').src = 'https://aka.doubaocdn.com/s/P6MHzWeP3J';
-    $('payStatus').textContent = '⚠️ 未配置自动支付，扫码后请联系作者获取激活码';
-    $('payStatus').className = 'pay-status error';
+    payQrImg.src = 'https://aka.doubaocdn.com/s/P6MHzWeP3J';
+    payStatus.textContent = '⚠️ 未配置自动支付，扫码后请联系作者获取激活码';
+    payStatus.className = 'pay-status error';
     return;
   }
+  // auto模式使用相对路径（同域名Netlify Functions）
+  const apiBase = getApiBase();
 
-  $('payLoading').style.display = 'flex';
-  $('payStatus').textContent = '';
-  $('payStatus').className = 'pay-status';
+  payLoading.style.display = 'flex';
+  payStatus.textContent = '';
+  payStatus.className = 'pay-status';
 
   try {
     const deviceId = getDeviceId();
-    const res = await fetch(BACKEND_URL + '/api/pay/create', {
+    const res = await fetch(apiBase + '/api/pay/create', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ deviceId, payType: currentPayType })
@@ -4795,34 +4808,35 @@ async function createPayOrder() {
 
     if (data.success) {
       currentPayOrder = data.orderId;
-      $('payQrImg').src = data.qrCode;
-      $('payStatus').textContent = '⏳ 等待支付...请使用' + (currentPayType === 'wechat' ? '微信' : '支付宝') + '扫码';
-      $('payStatus').className = 'pay-status waiting';
+      payQrImg.src = data.qrCode;
+      payStatus.textContent = '⏳ 等待支付...请使用' + (currentPayType === 'wechat' ? '微信' : '支付宝') + '扫码';
+      payStatus.className = 'pay-status waiting';
       startPayPolling();
     } else {
-      $('payStatus').textContent = '❌ ' + (data.msg || '创建订单失败');
-      $('payStatus').className = 'pay-status error';
+      payStatus.textContent = '❌ ' + (data.msg || '创建订单失败');
+      payStatus.className = 'pay-status error';
     }
   } catch (e) {
-    $('payStatus').textContent = '❌ 无法连接支付服务器';
-    $('payStatus').className = 'pay-status error';
+    payStatus.textContent = '❌ 无法连接支付服务器';
+    payStatus.className = 'pay-status error';
   } finally {
-    $('payLoading').style.display = 'none';
+    payLoading.style.display = 'none';
   }
 }
 
 // 轮询支付状态
 function startPayPolling() {
   stopPayPolling();
+  const apiBase = getApiBase();
   payPollTimer = setInterval(async () => {
     if (!currentPayOrder) return;
     try {
-      const res = await fetch(BACKEND_URL + '/api/pay/status?orderId=' + currentPayOrder);
+      const res = await fetch(apiBase + '/api/pay/query?orderId=' + currentPayOrder);
       const data = await res.json();
-      if (data.success && data.status === 'paid') {
+      if (data.success && data.paid === true) {
         stopPayPolling();
-        $('payStatus').textContent = '🎉 支付成功！正在自动激活...';
-        $('payStatus').className = 'pay-status success';
+        payStatus.textContent = '🎉 支付成功！正在自动激活...';
+        payStatus.className = 'pay-status success';
         // 自动激活
         try { localStorage.setItem(ACTIVATION_KEY, 'true'); } catch (e) {}
         stopTrialTimer();
@@ -4830,10 +4844,10 @@ function startPayPolling() {
           hideActivation();
           alert('🎉 激活成功！永久畅玩全部内容');
         }, 1500);
-      } else if (data.status === 'expired') {
+      } else if (data.status === 'CD' || data.status === 'expired') {
         stopPayPolling();
-        $('payStatus').textContent = '⏰ 订单已超时，请重新生成二维码';
-        $('payStatus').className = 'pay-status error';
+        payStatus.textContent = '⏰ 订单已超时或取消，请重新生成二维码';
+        payStatus.className = 'pay-status error';
       }
     } catch (e) {
       // 网络错误，继续轮询
