@@ -1200,9 +1200,18 @@
     position: absolute;
     top: 50%; left: 50%;
     transform: translate(-50%, -50%);
-    width: 34px; height: 34px;
+    width: 42px; height: 42px;
     z-index: 25; pointer-events: none;
+    transition: left 0.28s cubic-bezier(0.34, 1.56, 0.64, 1), top 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
+  .crosshair.locked {
+    animation: crosshair-pulse 0.7s ease-in-out infinite;
+  }
+  @keyframes crosshair-pulse {
+    0%, 100% { transform: translate(-50%, -50%) scale(1); }
+    50% { transform: translate(-50%, -50%) scale(1.2); }
+  }
+
   .crosshair::before, .crosshair::after {
     content: ''; position: absolute;
     background: rgba(220, 30, 30, 0.85);
@@ -1454,11 +1463,21 @@
   .shotgun {
     position: absolute;
     bottom: -25px; left: 50%;
-    transform: translateX(-50%);
+    transform: translateX(-50%) rotate(0deg);
+    transform-origin: 50% 92%;
     width: 240px; height: 150px;
     z-index: 30; pointer-events: none;
-    transition: transform 0.08s ease-out;
+    transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
+  .shotgun.recoil {
+    animation: shotgun-recoil 0.18s ease-out;
+  }
+  @keyframes shotgun-recoil {
+    0% { transform: translateX(-50%) rotate(var(--gun-angle, 0deg)) scale(1); }
+    40% { transform: translateX(-50%) rotate(var(--gun-angle, 0deg)) scale(0.9) translateY(18px); }
+    100% { transform: translateX(-50%) rotate(var(--gun-angle, 0deg)) scale(1); }
+  }
+
   .shotgun.recoil {
     transform: translateX(-50%) translateY(22px) rotate(-4deg);
   }
@@ -1566,6 +1585,50 @@
   opacity: 0.8 !important;
   border-color: #a0aec0 !important;
 }
+
+  /* 子弹轨迹 */
+  .bullet-trail {
+    position: absolute;
+    height: 4px;
+    background: linear-gradient(90deg, rgba(255,200,50,0) 0%, rgba(255,200,50,0.9) 30%, #fff 50%, rgba(255,200,50,0.9) 70%, rgba(255,200,50,0) 100%);
+    border-radius: 2px;
+    z-index: 26; pointer-events: none;
+    box-shadow: 0 0 8px rgba(255,180,0,0.8), 0 0 16px rgba(255,150,0,0.5);
+    transform-origin: left center;
+    animation: bullet-fly 0.15s linear forwards;
+  }
+  @keyframes bullet-fly {
+    0% { opacity: 0; transform: scaleX(0); }
+    20% { opacity: 1; transform: scaleX(1); }
+    100% { opacity: 0; transform: scaleX(1); }
+  }
+  /* 目标爆炸效果 */
+  .target-explosion {
+    position: absolute;
+    width: 120px; height: 120px;
+    border-radius: 50%;
+    background: radial-gradient(circle, #fff 0%, #FFD700 20%, #FF6B00 45%, #FF0000 70%, transparent 100%);
+    z-index: 20; pointer-events: none;
+    transform: translate(-50%, -50%) scale(0);
+    animation: explosion 0.5s ease-out forwards;
+  }
+  @keyframes explosion {
+    0% { transform: translate(-50%, -50%) scale(0); opacity: 1; }
+    50% { transform: translate(-50%, -50%) scale(1.5); opacity: 0.9; }
+    100% { transform: translate(-50%, -50%) scale(2.2); opacity: 0; }
+  }
+  /* 爆炸碎片 */
+  .explosion-particle {
+    position: absolute;
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    z-index: 19; pointer-events: none;
+    animation: particle-fly 0.6s ease-out forwards;
+  }
+  @keyframes particle-fly {
+    0% { transform: translate(0, 0) scale(1); opacity: 1; }
+    100% { transform: translate(var(--px), var(--py)) scale(0); opacity: 0; }
+  }
 </style>
 
 </head>
@@ -1646,7 +1709,7 @@
     </div>
     <button class="btn btn-lavender" id="leaderboardBtn" style="font-size:15px;padding:8px 20px;">🏆 排行榜</button>
     <button class="btn btn-lavender" id="upgradeBtn" style="font-size:15px;padding:8px 20px;">📦 词库升级包管理</button>
-    <a class="btn btn-primary" id="downloadBtn" href="https://aka.doubaocdn.com/s/ozhqvPVVpW" download="WordTyper_v2.1.0_桌面版.zip" style="font-size:15px;padding:8px 20px;text-decoration:none;display:inline-block;">💻 下载电脑版 v2.1.0（免安装）</a>
+    <a class="btn btn-primary" id="downloadBtn" href="https://aka.doubaocdn.com/s/zTDTfNrGjq" download="WordTyper_v2.1.0_桌面版.zip" style="font-size:15px;padding:8px 20px;text-decoration:none;display:inline-block;">💻 下载电脑版 v2.1.0（免安装）</a>
   </div>
   <div style="margin-top:10px;text-align:center;">
     <span class="contact-email" id="contactEmail" title="点击复制邮箱">📧 客户意见：39951555@qq.com</span>
@@ -1668,7 +1731,7 @@
   </div>
   <div class="progress-bar" style="margin-bottom:6px;max-width:900px;width:100%;"><div class="progress-fill" id="classicProgress" style="width: 0%"></div></div>
   <div class="shooting-range" id="shootingRange">
-    <div class="crosshair"></div>
+    <div class="crosshair" id="crosshair"></div>
     <div class="muzzle-flash" id="muzzleFlash"></div>
     <div class="shotgun" id="shotgun">
       <div class="shotgun-barrels">
@@ -5971,6 +6034,8 @@ function loadClassicWord() {
     wordEl.appendChild(s);
   }
   updateClassicLetterUI();
+  // 让枪口对准新目标
+  setTimeout(() => updateGunAim(), 150);
   $('classicProgress').style.width = (gs.currentIndex / gs.words.length * 100) + '%';
 }
 function updateClassicLetterUI() {
@@ -6003,11 +6068,158 @@ function updateClassicStats() {
   $('classicCombo').textContent = gs.combo;
   $('classicCount').textContent = `${gs.currentIndex}/${gs.words.length}`;
 }
+// 更新枪口瞄准：让准星和猎枪对准目标单词
+function updateGunAim() {
+  const target = $('currentTarget');
+  const crosshair = $('crosshair') || document.querySelector('.crosshair');
+  const shotgun = $('shotgun');
+  const range = $('shootingRange');
+  if (!target || !crosshair || !shotgun || !range) return;
+  
+  const rangeRect = range.getBoundingClientRect();
+  const targetRect = target.getBoundingClientRect();
+  
+  // 计算目标中心点（相对于射击区域）
+  const targetCenterX = targetRect.left - rangeRect.left + targetRect.width / 2;
+  const targetCenterY = targetRect.top - rangeRect.top + targetRect.height / 2;
+  
+  // 移动准星到目标位置
+  crosshair.style.left = targetCenterX + 'px';
+  crosshair.style.top = targetCenterY + 'px';
+  crosshair.classList.add('locked');
+  
+  // 计算猎枪旋转角度
+  // 猎枪底部中心点
+  const gunBaseX = rangeRect.width / 2;
+  const gunBaseY = rangeRect.height - 20; // 猎枪底部位置
+  
+  // 计算角度（从垂直向上为0度，顺时针为正）
+  const dx = targetCenterX - gunBaseX;
+  const dy = gunBaseY - targetCenterY;
+  let angle = Math.atan2(dx, dy) * (180 / Math.PI);
+  
+  // 限制角度范围，避免猎枪旋转过度
+  angle = Math.max(-70, Math.min(70, angle));
+  
+  // 设置猎枪旋转角度
+  shotgun.style.setProperty('--gun-angle', angle + 'deg');
+  shotgun.style.transform = 'translateX(-50%) rotate(' + angle + 'deg)';
+  
+  // 调整枪口火焰位置
+  const muzzleFlash = $('muzzleFlash');
+  if (muzzleFlash) {
+    const barrelLength = 100;
+    const rad = angle * (Math.PI / 180);
+    const muzzleX = gunBaseX + Math.sin(rad) * barrelLength;
+    const muzzleY = gunBaseY - Math.cos(rad) * barrelLength;
+    muzzleFlash.style.left = muzzleX + 'px';
+    muzzleFlash.style.bottom = (rangeRect.height - muzzleY) + 'px';
+    muzzleFlash.style.transform = 'translateX(-50%) rotate(' + angle + 'deg)';
+  }
+}
+
+// 发射子弹：从枪口射向目标
+function fireBullet() {
+  const target = $('currentTarget');
+  const range = $('shootingRange');
+  const shotgun = $('shotgun');
+  if (!target || !range || !shotgun) return;
+  
+  const rangeRect = range.getBoundingClientRect();
+  const targetRect = target.getBoundingClientRect();
+  
+  const targetCenterX = targetRect.left - rangeRect.left + targetRect.width / 2;
+  const targetCenterY = targetRect.top - rangeRect.top + targetRect.height / 2;
+  
+  const gunBaseX = rangeRect.width / 2;
+  const gunBaseY = rangeRect.height - 20;
+  
+  // 计算枪口位置
+  const angle = parseFloat(shotgun.style.getPropertyValue('--gun-angle')) || 0;
+  const rad = angle * (Math.PI / 180);
+  const barrelLength = 100;
+  const muzzleX = gunBaseX + Math.sin(rad) * barrelLength;
+  const muzzleY = gunBaseY - Math.cos(rad) * barrelLength;
+  
+  // 创建子弹轨迹
+  const bullet = document.createElement('div');
+  bullet.className = 'bullet-trail';
+  
+  const dx = targetCenterX - muzzleX;
+  const dy = targetCenterY - muzzleY;
+  const distance = Math.sqrt(dx * dx + dy * dy);
+  const bulletAngle = Math.atan2(dy, dx) * (180 / Math.PI);
+  
+  bullet.style.left = muzzleX + 'px';
+  bullet.style.top = muzzleY + 'px';
+  bullet.style.width = distance + 'px';
+  bullet.style.transform = 'rotate(' + bulletAngle + 'deg)';
+  
+  range.appendChild(bullet);
+  
+  // 0.15秒后移除子弹
+  setTimeout(() => {
+    if (bullet.parentNode) bullet.parentNode.removeChild(bullet);
+  }, 200);
+  
+  // 显示枪口火焰
+  const muzzleFlash = $('muzzleFlash');
+  if (muzzleFlash) {
+    muzzleFlash.style.opacity = '1';
+    setTimeout(() => { muzzleFlash.style.opacity = '0'; }, 80);
+  }
+}
+
+// 目标爆炸效果
+function explodeTarget() {
+  const target = $('currentTarget');
+  const range = $('shootingRange');
+  if (!target || !range) return;
+  
+  const rangeRect = range.getBoundingClientRect();
+  const targetRect = target.getBoundingClientRect();
+  const targetCenterX = targetRect.left - rangeRect.left + targetRect.width / 2;
+  const targetCenterY = targetRect.top - rangeRect.top + targetRect.height / 2;
+  
+  // 创建爆炸效果
+  const explosion = document.createElement('div');
+  explosion.className = 'target-explosion';
+  explosion.style.left = targetCenterX + 'px';
+  explosion.style.top = targetCenterY + 'px';
+  range.appendChild(explosion);
+  
+  // 创建爆炸碎片
+  const colors = ['#FFD700', '#FF6B00', '#FF0000', '#FFFFFF', '#FFA500'];
+  for (let i = 0; i < 12; i++) {
+    const particle = document.createElement('div');
+    particle.className = 'explosion-particle';
+    particle.style.left = targetCenterX + 'px';
+    particle.style.top = targetCenterY + 'px';
+    particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+    const angle = (Math.PI * 2 * i) / 12 + Math.random() * 0.5;
+    const distance = 50 + Math.random() * 60;
+    particle.style.setProperty('--px', Math.cos(angle) * distance + 'px');
+    particle.style.setProperty('--py', Math.sin(angle) * distance + 'px');
+    range.appendChild(particle);
+    setTimeout(() => { if (particle.parentNode) particle.parentNode.removeChild(particle); }, 700);
+  }
+  
+  // 0.5秒后移除爆炸效果
+  setTimeout(() => {
+    if (explosion.parentNode) explosion.parentNode.removeChild(explosion);
+  }, 600);
+}
+
 function triggerRecoil() {
   const gun = $('shotgun');
   if (!gun) return;
+  // 先移除再添加，确保动画能重复触发
+  gun.classList.remove('recoil');
+  void gun.offsetWidth; // 强制重绘
   gun.classList.add('recoil');
-  setTimeout(() => gun.classList.remove('recoil'), 100);
+  setTimeout(() => gun.classList.remove('recoil'), 200);
+  // 发射子弹
+  fireBullet();
 }
 function addBulletHole() {
   const target = $('currentTarget');
@@ -6156,7 +6368,8 @@ function onClassicWordComplete() {
   g.textContent = ['太棒了！', '真厉害！', '做得好！', '完美！'][Math.floor(Math.random() * 4)];
   range.appendChild(g);
   setTimeout(() => g.remove(), 1500);
-  setTimeout(() => { gs.currentIndex++; loadClassicWord(); }, 1200);
+  setTimeout(() => { gs.currentIndex++; explodeTarget();
+  loadClassicWord(); }, 1200);
 }
 
 /* ========= 消除模式 ========= */
