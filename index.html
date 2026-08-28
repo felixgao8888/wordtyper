@@ -1157,7 +1157,7 @@
     flex: 1;
     position: relative;
     overflow: hidden;
-    background: linear-gradient(180deg, #87CEEB 0%, #B0E0E6 42%, #98FB98 42%, #7CB342 100%);
+    background: linear-gradient(180deg, #87CEEB 0%, #B0E0E6 38%, #C8E6C9 42%, #98FB98 46%, #7CB342 100%);
     border-radius: var(--radius-sm);
     box-shadow: inset 0 4px 20px rgba(0,0,0,0.15);
     margin-bottom: 8px;
@@ -1179,16 +1179,7 @@
     pointer-events: none;
     z-index: 1;
   }
-  /* 地平线光晕 */
-  .shooting-range::after {
-    content: '';
-    position: absolute;
-    bottom: 42%; left: 0;
-    width: 100%; height: 3px;
-    background: linear-gradient(90deg, transparent, rgba(255,220,100,0.7), transparent);
-    pointer-events: none;
-    z-index: 1;
-  }
+  /* 地平线光晕已移除 */
   .shooting-range::before {
     content: '';
     position: absolute;
@@ -1370,7 +1361,7 @@
     top: 35%;
     width: 26px;
     height: 14px;
-    background: radial-gradient(ellipse, rgba(255,255,255,0.92) 0%, rgba(220,220,230,0.8) 60%, transparent 100%);
+    background: radial-gradient(ellipse, rgba(0,0,0,0.28) 0%, rgba(0,0,0,0.15) 50%, transparent 100%); mix-blend-mode: multiply;
     border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
     filter: drop-shadow(0 2px 3px rgba(0,0,0,0.15));
     pointer-events: none;
@@ -1523,9 +1514,9 @@
   }
   .muzzle-flash {
     position: absolute;
-    bottom: 160px; left: 50%;
+    bottom: 145px; left: 50%;
     transform: translateX(-50%);
-    width: 65px; height: 65px;
+    width: 70px; height: 70px;
     background: radial-gradient(circle, #FFFF00 0%, #FF8C00 35%, #FF4500 60%, transparent 75%);
     border-radius: 50%;
     z-index: 28; pointer-events: none;
@@ -1586,17 +1577,7 @@
   border-color: #a0aec0 !important;
 }
 
-  /* 子弹轨迹 */
-  .bullet-trail {
-    position: absolute;
-    height: 4px;
-    background: linear-gradient(90deg, rgba(255,200,50,0) 0%, rgba(255,200,50,0.9) 30%, #fff 50%, rgba(255,200,50,0.9) 70%, rgba(255,200,50,0) 100%);
-    border-radius: 2px;
-    z-index: 26; pointer-events: none;
-    box-shadow: 0 0 8px rgba(255,180,0,0.8), 0 0 16px rgba(255,150,0,0.5);
-    transform-origin: left center;
-    animation: bullet-fly 0.15s linear forwards;
-  }
+  /* 子弹轨迹（已停用） */
   @keyframes bullet-fly {
     0% { opacity: 0; transform: scaleX(0); }
     20% { opacity: 1; transform: scaleX(1); }
@@ -1629,6 +1610,557 @@
     0% { transform: translate(0, 0) scale(1); opacity: 1; }
     100% { transform: translate(var(--px), var(--py)) scale(0); opacity: 0; }
   }
+
+  /* ========= 射击场场景元素 ========= */
+  .scene-tree {
+    position: absolute;
+    font-size: 50px;
+    z-index: 2;
+    pointer-events: none;
+    filter: drop-shadow(0 4px 6px rgba(0,0,0,0.2));
+    animation: tree-sway 4s ease-in-out infinite;
+  }
+  @keyframes tree-sway {
+    0%, 100% { transform: rotate(-2deg); }
+    50% { transform: rotate(2deg); }
+  }
+  .scene-flower {
+    position: absolute;
+    font-size: 24px;
+    z-index: 2;
+    pointer-events: none;
+    animation: flower-sway 3s ease-in-out infinite;
+  }
+  @keyframes flower-sway {
+    0%, 100% { transform: rotate(-5deg) scale(1); }
+    50% { transform: rotate(5deg) scale(1.1); }
+  }
+  .scene-grass {
+    position: absolute;
+    font-size: 20px;
+    z-index: 2;
+    pointer-events: none;
+  }
+  .scene-pond {
+    position: absolute;
+    z-index: 1;
+    pointer-events: none;
+    background: linear-gradient(180deg, #4FC3F7 0%, #29B6F6 50%, #0288D1 100%);
+    border-radius: 50% 50% 45% 55% / 55% 45% 55% 45%;
+    box-shadow: inset 0 4px 12px rgba(255,255,255,0.4), 0 4px 12px rgba(0,0,0,0.2);
+    overflow: hidden;
+  }
+  .scene-pond::before {
+    content: '';
+    position: absolute;
+    top: 15%; left: 10%;
+    width: 40%; height: 20%;
+    background: rgba(255,255,255,0.3);
+    border-radius: 50%;
+    animation: pond-shine 3s ease-in-out infinite;
+  }
+  @keyframes pond-shine {
+    0%, 100% { transform: translateX(0); opacity: 0.3; }
+    50% { transform: translateX(20px); opacity: 0.6; }
+  }
+  .scene-house {
+    position: absolute;
+    z-index: 2;
+    pointer-events: none;
+    font-size: 60px;
+    filter: drop-shadow(0 6px 8px rgba(0,0,0,0.3));
+  }
+  .scene-duck {
+    position: absolute;
+    font-size: 28px;
+    z-index: 3;
+    pointer-events: none;
+    animation: duck-swim 8s ease-in-out infinite;
+  }
+  @keyframes duck-swim {
+    0% { transform: translateX(0) scaleX(1); }
+    45% { transform: translateX(60px) scaleX(1); }
+    50% { transform: translateX(60px) scaleX(-1); }
+    95% { transform: translateX(0) scaleX(-1); }
+    100% { transform: translateX(0) scaleX(1); }
+  }
+  .scene-cloud {
+    position: absolute;
+    font-size: 40px;
+    z-index: 1;
+    pointer-events: none;
+    opacity: 0.9;
+    animation: cloud-float 20s linear infinite;
+  }
+  @keyframes cloud-float {
+    0% { transform: translateX(-100px); }
+    100% { transform: translateX(calc(100vw + 100px)); }
+  }
+  .scene-butterfly {
+    position: absolute;
+    font-size: 20px;
+    z-index: 3;
+    pointer-events: none;
+    animation: butterfly-fly 6s ease-in-out infinite;
+  }
+  @keyframes butterfly-fly {
+    0%, 100% { transform: translate(0, 0) rotate(0deg); }
+    25% { transform: translate(30px, -20px) rotate(10deg); }
+    50% { transform: translate(60px, 0) rotate(-10deg); }
+    75% { transform: translate(30px, 20px) rotate(10deg); }
+  }
+
+  /* 固定的大太阳 */
+  .scene-sun {
+    position: absolute;
+    font-size: 80px;
+    z-index: 1;
+    pointer-events: none;
+    filter: drop-shadow(0 0 20px rgba(255, 200, 0, 0.6));
+    animation: sun-glow 3s ease-in-out infinite;
+  }
+  @keyframes sun-glow {
+    0%, 100% { filter: drop-shadow(0 0 20px rgba(255, 200, 0, 0.6)); transform: scale(1); }
+    50% { filter: drop-shadow(0 0 35px rgba(255, 200, 0, 0.9)); transform: scale(1.05); }
+  }
+
+  /* ========= 过关提示 ========= */
+  .level-complete-overlay {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    pointer-events: none;
+    animation: overlay-fade-in 0.3s ease-out;
+  }
+  @keyframes overlay-fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  .level-complete-box {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 40px 60px;
+    border-radius: 20px;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+    animation: level-box-pop 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  }
+  @keyframes level-box-pop {
+    0% { transform: scale(0); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  .level-complete-title {
+    font-size: 36px;
+    font-weight: bold;
+    color: #fff;
+    margin-bottom: 12px;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+  }
+  .level-complete-sub {
+    font-size: 20px;
+    color: rgba(255,255,255,0.9);
+    margin-bottom: 8px;
+  }
+  .level-complete-words {
+    font-size: 16px;
+    color: rgba(255,255,255,0.7);
+    font-style: italic;
+  }
+  .level-confetti {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    z-index: 99;
+    pointer-events: none;
+    animation: confetti-fall linear forwards;
+  }
+  @keyframes confetti-fall {
+    0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+  }
+
+  /* ========= 过关奖励动画 ========= */
+  .reward-animation {
+    font-size: 60px;
+    margin: 15px 0;
+    text-align: center;
+  }
+  .reward-name {
+    font-size: 18px;
+    color: #FFD700;
+    font-weight: bold;
+    margin-bottom: 10px;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  }
+  .level-encouragement {
+    font-size: 16px;
+    color: #fff;
+    margin-bottom: 15px;
+    font-style: italic;
+    background: rgba(255,255,255,0.15);
+    padding: 8px 16px;
+    border-radius: 20px;
+    display: inline-block;
+  }
+  .level-stats {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    margin-bottom: 15px;
+    font-size: 14px;
+    color: rgba(255,255,255,0.9);
+  }
+  .level-stats span {
+    background: rgba(0,0,0,0.2);
+    padding: 5px 12px;
+    border-radius: 12px;
+  }
+  
+  /* 各种奖励动画 */
+  .reward-dance { animation: dance-bounce 0.5s ease-in-out infinite; }
+  @keyframes dance-bounce {
+    0%, 100% { transform: translateY(0) rotate(-5deg); }
+    50% { transform: translateY(-15px) rotate(5deg); }
+  }
+  .reward-chicken { animation: chicken-shake 0.3s ease-in-out infinite; }
+  @keyframes chicken-shake {
+    0%, 100% { transform: rotate(-10deg) scale(1); }
+    50% { transform: rotate(10deg) scale(1.1); }
+  }
+  .reward-dog { animation: dog-flip 1s ease-in-out infinite; }
+  @keyframes dog-flip {
+    0% { transform: rotate(0deg); }
+    50% { transform: rotate(180deg) scale(1.2); }
+    100% { transform: rotate(360deg); }
+  }
+  .reward-cat { animation: cat-cute 0.8s ease-in-out infinite; }
+  @keyframes cat-cute {
+    0%, 100% { transform: scale(1) translateY(0); }
+    25% { transform: scale(1.15) translateY(-5px); }
+    75% { transform: scale(0.95) translateY(5px); }
+  }
+  .reward-unicorn { animation: unicorn-magic 1.5s ease-in-out infinite; }
+  @keyframes unicorn-magic {
+    0%, 100% { transform: scale(1) rotate(0deg); filter: hue-rotate(0deg); }
+    50% { transform: scale(1.2) rotate(10deg); filter: hue-rotate(180deg); }
+  }
+  .reward-pizza { animation: pizza-fall 1s ease-in infinite; }
+  @keyframes pizza-fall {
+    0% { transform: translateY(-30px) rotate(0deg); opacity: 0; }
+    20% { opacity: 1; }
+    100% { transform: translateY(30px) rotate(360deg); opacity: 0; }
+  }
+  .reward-stars { animation: stars-spin 2s linear infinite; }
+  @keyframes stars-spin {
+    0% { transform: rotate(0deg) scale(1); }
+    50% { transform: rotate(180deg) scale(1.3); }
+    100% { transform: rotate(360deg) scale(1); }
+  }
+  .reward-crown { animation: crown-float 1.2s ease-in-out infinite; }
+  @keyframes crown-float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-12px); }
+  }
+  .reward-balloon { animation: balloon-rise 1.5s ease-in-out infinite; }
+  @keyframes balloon-rise {
+    0%, 100% { transform: translateY(0) rotate(-3deg); }
+    50% { transform: translateY(-15px) rotate(3deg); }
+  }
+  .reward-panda { animation: panda-roll 1.5s ease-in-out infinite; }
+  @keyframes panda-roll {
+    0% { transform: translateX(-20px) rotate(0deg); }
+    50% { transform: translateX(20px) rotate(180deg); }
+    100% { transform: translateX(-20px) rotate(360deg); }
+  }
+  .reward-dino { animation: dino-rock 0.6s ease-in-out infinite; }
+  @keyframes dino-rock {
+    0%, 100% { transform: rotate(-8deg) scale(1); }
+    50% { transform: rotate(8deg) scale(1.1); }
+  }
+  .reward-candy { animation: candy-shake 0.4s ease-in-out infinite; }
+  @keyframes candy-shake {
+    0%, 100% { transform: translateY(0) rotate(-5deg); }
+    50% { transform: translateY(-8px) rotate(5deg); }
+  }
+
+  /* ========= 狙击猎枪图标 ========= */
+  .sniper-rifle-icon {
+    position: relative;
+    width: 80px;
+    height: 50px;
+    margin: 0 auto;
+  }
+  .sniper-barrel {
+    position: absolute;
+    top: 18px;
+    left: 0;
+    width: 45px;
+    height: 8px;
+    background: linear-gradient(180deg, #4a4a4a 0%, #2a2a2a 50%, #1a1a1a 100%);
+    border-radius: 2px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  }
+  .sniper-barrel::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -3px;
+    width: 8px;
+    height: 12px;
+    background: linear-gradient(180deg, #5a5a5a, #3a3a3a);
+    border-radius: 1px;
+  }
+  .sniper-body {
+    position: absolute;
+    top: 15px;
+    left: 35px;
+    width: 30px;
+    height: 14px;
+    background: linear-gradient(180deg, #5D4037 0%, #4E342E 50%, #3E2723 100%);
+    border-radius: 3px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  }
+  .sniper-scope {
+    position: absolute;
+    top: 5px;
+    left: 38px;
+    width: 22px;
+    height: 12px;
+    background: linear-gradient(180deg, #333 0%, #1a1a1a 100%);
+    border-radius: 6px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.4);
+  }
+  .sniper-scope::before {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 6px;
+    height: 8px;
+    background: radial-gradient(circle, #4FC3F7 0%, #0288D1 100%);
+    border-radius: 50%;
+    box-shadow: inset 0 0 3px rgba(255,255,255,0.5);
+  }
+  .sniper-scope::after {
+    content: '';
+    position: absolute;
+    top: 4px;
+    left: 10px;
+    width: 10px;
+    height: 4px;
+    background: #222;
+    border-radius: 2px;
+  }
+  .sniper-stock {
+    position: absolute;
+    top: 12px;
+    right: 0;
+    width: 20px;
+    height: 22px;
+    background: linear-gradient(180deg, #6D4C41 0%, #5D4037 50%, #4E342E 100%);
+    border-radius: 0 8px 8px 0;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  }
+  .sniper-grip {
+    position: absolute;
+    top: 26px;
+    left: 50px;
+    width: 10px;
+    height: 16px;
+    background: linear-gradient(180deg, #5D4037, #4E342E);
+    border-radius: 0 0 4px 4px;
+    transform: rotate(-15deg);
+  }
+  .sniper-magazine {
+    position: absolute;
+    top: 28px;
+    left: 40px;
+    width: 8px;
+    height: 12px;
+    background: linear-gradient(180deg, #444, #222);
+    border-radius: 0 0 3px 3px;
+  }
+
+  /* 下一关按钮 */
+  .next-level-btn {
+    margin-top: 20px;
+    padding: 14px 40px;
+    font-size: 18px;
+    font-weight: bold;
+    color: white;
+    background: linear-gradient(135deg, #FF6B6B 0%, #EE5A24 100%);
+    border: none;
+    border-radius: 30px;
+    cursor: pointer;
+    box-shadow: 0 6px 20px rgba(238, 90, 36, 0.5);
+    transition: all 0.3s ease;
+    animation: btn-pulse 1.5s ease-in-out infinite;
+  }
+  .next-level-btn:hover {
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 10px 30px rgba(238, 90, 36, 0.7);
+  }
+  .next-level-btn:active {
+    transform: translateY(0) scale(0.98);
+  }
+  @keyframes btn-pulse {
+    0%, 100% { box-shadow: 0 6px 20px rgba(238, 90, 36, 0.5); }
+    50% { box-shadow: 0 6px 35px rgba(238, 90, 36, 0.9); }
+  }
+
+  /* ========= 夜间模式 ========= */
+  .shooting-range.night-mode {
+    background: linear-gradient(180deg, 
+      #05051a 0%, 
+      #0f0f3d 15%, 
+      #1a1a5c 30%, 
+      #25256b 42%, 
+      #1f3a4a 50%, 
+      #15352a 58%, 
+      #0d2818 70%, 
+      #071a0e 85%, 
+      #040f08 100%) !important;
+  }
+  
+  /* 月亮 */
+  .night-moon {
+    position: absolute;
+    top: 6%;
+    right: 10%;
+    font-size: 60px;
+    z-index: 2;
+    pointer-events: none;
+    filter: drop-shadow(0 0 20px rgba(255, 255, 200, 0.6));
+    animation: moon-glow 4s ease-in-out infinite;
+  }
+  @keyframes moon-glow {
+    0%, 100% { filter: drop-shadow(0 0 20px rgba(255, 255, 200, 0.6)); }
+    50% { filter: drop-shadow(0 0 35px rgba(255, 255, 200, 0.9)); }
+  }
+  
+  /* 星星 */
+  .night-star {
+    position: absolute;
+    z-index: 1;
+    pointer-events: none;
+    animation: star-twinkle 2s ease-in-out infinite;
+  }
+  @keyframes star-twinkle {
+    0%, 100% { opacity: 0.3; transform: scale(0.8); }
+    50% { opacity: 1; transform: scale(1.2); }
+  }
+  
+  /* 蝙蝠 */
+  .night-bat {
+    position: absolute;
+    font-size: 24px;
+    z-index: 3;
+    pointer-events: none;
+    animation: bat-fly 8s ease-in-out infinite;
+  }
+  @keyframes bat-fly {
+    0% { left: -5%; transform: translateY(0) scaleX(1); }
+    25% { transform: translateY(-20px) scaleX(1); }
+    50% { left: 105%; transform: translateY(10px) scaleX(1); }
+    51% { transform: translateY(10px) scaleX(-1); }
+    75% { transform: translateY(-15px) scaleX(-1); }
+    100% { left: -5%; transform: translateY(0) scaleX(-1); }
+  }
+  
+  /* 萤火虫 */
+  .night-firefly {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    background: radial-gradient(circle, #ffff88 0%, #ffff00 40%, transparent 70%);
+    border-radius: 50%;
+    z-index: 4;
+    pointer-events: none;
+    box-shadow: 0 0 10px #ffff00, 0 0 20px #ffff88;
+    animation: firefly-glow 3s ease-in-out infinite, firefly-move 8s ease-in-out infinite;
+  }
+  @keyframes firefly-glow {
+    0%, 100% { opacity: 0.2; transform: scale(0.8); }
+    50% { opacity: 1; transform: scale(1.3); }
+  }
+  @keyframes firefly-move {
+    0%, 100% { margin-left: 0; margin-top: 0; }
+    25% { margin-left: 30px; margin-top: -20px; }
+    50% { margin-left: -20px; margin-top: 15px; }
+    75% { margin-left: 15px; margin-top: -10px; }
+  }
+  
+  /* 夜间模式下的房子灯火 */
+  .night-mode .scene-house {
+    filter: drop-shadow(0 0 15px rgba(255, 200, 50, 0.5));
+  }
+  .night-mode .scene-house::after {
+    content: '🪟';
+    position: absolute;
+    top: 25%;
+    left: 30%;
+    font-size: 20px;
+    filter: brightness(1.5) drop-shadow(0 0 8px rgba(255, 200, 50, 0.8));
+    animation: window-flicker 3s ease-in-out infinite;
+  }
+  @keyframes window-flicker {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.8; }
+    52% { opacity: 1; }
+    54% { opacity: 0.9; }
+  }
+  
+  /* 夜间模式下的池塘月光反射 */
+  .night-mode .scene-pond {
+    background: linear-gradient(180deg, #1a3a5c 0%, #0d2840 50%, #051525 100%) !important;
+    box-shadow: inset 0 4px 12px rgba(100, 150, 255, 0.2), 0 4px 12px rgba(0,0,0,0.4) !important;
+  }
+  .night-mode .scene-pond::before {
+    background: rgba(200, 220, 255, 0.15) !important;
+    animation: pond-moon-shine 4s ease-in-out infinite;
+  }
+  @keyframes pond-moon-shine {
+    0%, 100% { transform: translateX(0); opacity: 0.15; }
+    50% { transform: translateX(30px); opacity: 0.3; }
+  }
+  
+  /* 夜间模式下的云朵变暗 */
+  .night-mode .scene-cloud {
+    filter: brightness(0.3) opacity(0.4);
+  }
+  
+  /* 夜间模式下的太阳隐藏 */
+  .night-mode .scene-sun {
+    display: none;
+  }
+  
+  /* 夜间模式下的花草变暗 */
+  .night-mode .scene-flower,
+  .night-mode .scene-grass {
+    filter: brightness(0.5);
+  }
+  
+  /* 夜间模式下的树木变暗 */
+  .night-mode .scene-tree {
+    filter: brightness(0.4) drop-shadow(0 4px 6px rgba(0,0,0,0.5));
+  }
+  
+  /* 白天模式默认 */
+  .shooting-range.day-mode {
+    background: linear-gradient(180deg, 
+      #87CEEB 0%, 
+      #B0E0E6 30%, 
+      #C8E6C9 40%, 
+      #A5D6A7 45%, 
+      #81C784 50%, 
+      #66BB6A 60%, 
+      #4CAF50 75%, 
+      #388E3C 100%) !important;
+  }
 </style>
 
 </head>
@@ -1654,7 +2186,7 @@
     <span class="license-icon">⏳</span>
     <span class="license-text">未激活 · 免费体验120秒</span>
   </div>
-  <div class="version-badge" id="versionBadge">v2.1.0</div>
+  <div class="version-badge" id="versionBadge">v2.4.4</div>
   <div class="panel">
     <div class="step-indicator">
       <span class="step-dot active" id="stepDot1">1</span>
@@ -1671,7 +2203,14 @@
       <div class="panel-title">选择模式</div>
       <div class="mode-select" id="modeSelect">
         <div class="mode-card selected" data-mode="classic">
-          <div class="mode-icon">🔫</div>
+          <div class="mode-icon sniper-rifle-icon">
+            <div class="sniper-body"></div>
+            <div class="sniper-barrel"></div>
+            <div class="sniper-scope"></div>
+            <div class="sniper-stock"></div>
+            <div class="sniper-grip"></div>
+            <div class="sniper-magazine"></div>
+          </div>
           <div class="mode-name">打靶模式</div>
           <div class="mode-desc">猎枪打单词靶子<br>爽快射击</div>
         </div>
@@ -1709,7 +2248,7 @@
     </div>
     <button class="btn btn-lavender" id="leaderboardBtn" style="font-size:15px;padding:8px 20px;">🏆 排行榜</button>
     <button class="btn btn-lavender" id="upgradeBtn" style="font-size:15px;padding:8px 20px;">📦 词库升级包管理</button>
-    <a class="btn btn-primary" id="downloadBtn" href="https://aka.doubaocdn.com/s/zTDTfNrGjq" download="WordTyper_v2.1.0_桌面版.zip" style="font-size:15px;padding:8px 20px;text-decoration:none;display:inline-block;">💻 下载电脑版 v2.1.0（免安装）</a>
+    <a class="btn btn-primary" id="downloadBtn" href="https://aka.doubaocdn.com/s/JW4cU7HyLg" download="WordTyper_v2.4.4_桌面版.zip" style="font-size:15px;padding:8px 20px;text-decoration:none;display:inline-block;">💻 下载电脑版 v2.4.4（免安装）</a>
   </div>
   <div style="margin-top:10px;text-align:center;">
     <span class="contact-email" id="contactEmail" title="点击复制邮箱">📧 客户意见：39951555@qq.com</span>
@@ -1731,9 +2270,31 @@
   </div>
   <div class="progress-bar" style="margin-bottom:6px;max-width:900px;width:100%;"><div class="progress-fill" id="classicProgress" style="width: 0%"></div></div>
   <div class="shooting-range" id="shootingRange">
+    <!-- 场景装饰元素 -->
+    <div class="scene-cloud" style="top: 8%; left: -10%; animation-delay: 0s;">☁️</div>
+    <div class="scene-cloud" style="top: 15%; left: -30%; animation-delay: -8s; font-size: 32px;">☁️</div>
+    <div class="scene-sun" style="top: 6%; right: 8%;">☀️</div>
+    <div class="scene-house" style="bottom: 42%; left: 5%;">🏠</div>
+    <div class="scene-tree" style="bottom: 40%; left: 12%; animation-delay: 0s;">🌳</div>
+    <div class="scene-tree" style="bottom: 41%; right: 8%; animation-delay: -1s; font-size: 42px;">🌲</div>
+    <div class="scene-tree" style="bottom: 42%; right: 20%; animation-delay: -2s; font-size: 36px;">🌳</div>
+    <div class="scene-pond" style="bottom: 38%; left: 35%; width: 180px; height: 70px;"></div>
+    <div class="scene-duck" style="bottom: 43%; left: 38%;">🦆</div>
+    <div class="scene-duck" style="bottom: 45%; left: 45%; animation-delay: -3s; font-size: 22px;">🐤</div>
+    <div class="scene-flower" style="bottom: 36%; left: 8%; animation-delay: 0s;">🌸</div>
+    <div class="scene-flower" style="bottom: 35%; left: 20%; animation-delay: -1s;">🌼</div>
+    <div class="scene-flower" style="bottom: 37%; left: 28%; animation-delay: -0.5s;">🌺</div>
+    <div class="scene-flower" style="bottom: 36%; right: 15%; animation-delay: -1.5s;">🌻</div>
+    <div class="scene-flower" style="bottom: 35%; right: 25%; animation-delay: -2s;">🌷</div>
+    <div class="scene-grass" style="bottom: 34%; left: 3%;">🌿</div>
+    <div class="scene-grass" style="bottom: 34%; left: 16%;">🌾</div>
+    <div class="scene-grass" style="bottom: 34%; right: 12%;">🌿</div>
+    <div class="scene-grass" style="bottom: 34%; right: 30%;">🌾</div>
+    <div class="scene-butterfly" style="bottom: 50%; left: 25%; animation-delay: 0s;">🦋</div>
+    <div class="scene-butterfly" style="bottom: 55%; right: 30%; animation-delay: -3s;">🐝</div>
     <div class="crosshair" id="crosshair"></div>
-    <div class="muzzle-flash" id="muzzleFlash"></div>
     <div class="shotgun" id="shotgun">
+      <div class="muzzle-flash" id="muzzleFlash"></div>
       <div class="shotgun-barrels">
         <div class="shotgun-barrel"></div>
         <div class="shotgun-barrel"></div>
@@ -5850,10 +6411,18 @@ function startClassic() {
   initAudio();
   const gs = initClassicMode();
   state.classic = gs;
-  gs.words = getWordsForDifficulty(state.topic, state.difficulty);
+  const allWords = getWordsForDifficulty(state.topic, state.difficulty);
+  gs.words = shuffle(allWords).slice(0, 30);
+  gs.round = 1;
   showScreen('classic');
   addBgDecor('candy');
   spawnFarmAnimals();
+  // 初始化昼夜模式（第1关白天）
+  const initRange = $('shootingRange');
+  if (initRange) {
+    initRange.classList.add('day-mode');
+    initRange.classList.remove('night-mode');
+  }
   loadClassicWord();
   updateClassicStats();
   updateGameLicenseStatus();
@@ -5980,10 +6549,213 @@ function getWordsForDifficulty(topic, difficulty) {
 }
 function nextClassicRound() {
   const gs = state.classic;
-  gs.words = shuffle(getWordsForDifficulty(state.topic, state.difficulty));
+  const allWords = getWordsForDifficulty(state.topic, state.difficulty);
+  // 随机筛选30个不同的单词
+  let newWords = shuffle(allWords).slice(0, 30);
+  // 避免和上一关完全相同（如果词库足够大）
+  if (allWords.length > 40) {
+    const prevWords = new Set(gs.words.map(w => w.word));
+    const different = shuffle(allWords).filter(w => !prevWords.has(w.word));
+    if (different.length >= 20) {
+      newWords = different.slice(0, 30);
+      // 如果不够30个，用随机单词补充
+      while (newWords.length < 30) {
+        const randomWord = allWords[Math.floor(Math.random() * allWords.length)];
+        if (!newWords.find(w => w.word === randomWord.word)) {
+          newWords.push(randomWord);
+        }
+      }
+    }
+  }
+  gs.words = newWords;
   gs.currentIndex = 0;
   gs.round = (gs.round || 0) + 1;
+  // 切换昼夜背景（偶数关夜间，奇数关白天）
+  toggleDayNight(gs.round);
+  // 显示过关提示
+  showLevelComplete(gs.round - 1);
 }
+
+// 切换昼夜背景
+function toggleDayNight(round) {
+  const range = $('shootingRange');
+  if (!range) return;
+  
+  const isNight = round % 2 === 0;
+  
+  if (isNight) {
+    range.classList.add('night-mode');
+    range.classList.remove('day-mode');
+    // 创建夜间元素
+    createNightElements();
+  } else {
+    range.classList.add('day-mode');
+    range.classList.remove('night-mode');
+    // 移除夜间元素
+    removeNightElements();
+  }
+}
+
+// 创建夜间元素（星星、月亮、蝙蝠、萤火虫）
+function createNightElements() {
+  const range = $('shootingRange');
+  if (!range) return;
+  
+  // 移除已有的夜间元素
+  removeNightElements();
+  
+  // 创建月亮
+  const moon = document.createElement('div');
+  moon.className = 'night-moon';
+  moon.innerHTML = '🌙';
+  range.appendChild(moon);
+  
+  // 创建星星（20颗）
+  for (let i = 0; i < 20; i++) {
+    const star = document.createElement('div');
+    star.className = 'night-star';
+    star.style.left = (5 + Math.random() * 90) + '%';
+    star.style.top = (2 + Math.random() * 30) + '%';
+    star.style.animationDelay = Math.random() * 2 + 's';
+    star.style.fontSize = (10 + Math.random() * 14) + 'px';
+    star.textContent = ['⭐', '✨', '🌟'][Math.floor(Math.random() * 3)];
+    range.appendChild(star);
+  }
+  
+  // 创建蝙蝠（3只）
+  for (let i = 0; i < 3; i++) {
+    const bat = document.createElement('div');
+    bat.className = 'night-bat';
+    bat.style.top = (10 + Math.random() * 25) + '%';
+    bat.style.animationDelay = (i * 1.5) + 's';
+    bat.style.animationDuration = (6 + Math.random() * 4) + 's';
+    bat.textContent = '🦇';
+    range.appendChild(bat);
+  }
+  
+  // 创建萤火虫（8只）
+  for (let i = 0; i < 8; i++) {
+    const firefly = document.createElement('div');
+    firefly.className = 'night-firefly';
+    firefly.style.left = (10 + Math.random() * 80) + '%';
+    firefly.style.top = (45 + Math.random() * 35) + '%';
+    firefly.style.animationDelay = Math.random() * 3 + 's';
+    range.appendChild(firefly);
+  }
+}
+
+// 移除夜间元素
+function removeNightElements() {
+  const range = $('shootingRange');
+  if (!range) return;
+  range.querySelectorAll('.night-moon, .night-star, .night-bat, .night-firefly').forEach(el => el.remove());
+}
+
+/* ========= 过关提示 ========= */
+function showLevelComplete(level) {
+  const range = $('shootingRange');
+  if (!range) return;
+  const gs = state.classic;
+  
+  // 随机搞笑动画奖励
+  const rewards = [
+    { emoji: '🕺💃', name: '跳舞派对', anim: 'reward-dance' },
+    { emoji: '🐔🎵', name: '小鸡蹦迪', anim: 'reward-chicken' },
+    { emoji: '🐶🦴', name: '狗狗翻跟头', anim: 'reward-dog' },
+    { emoji: '🐱🐟', name: '猫咪卖萌', anim: 'reward-cat' },
+    { emoji: '🦄🌈', name: '独角兽彩虹', anim: 'reward-unicorn' },
+    { emoji: '🍕🎉', name: '披萨雨', anim: 'reward-pizza' },
+    { emoji: '⭐🌟', name: '星星雨', anim: 'reward-stars' },
+    { emoji: '🏆👑', name: '皇冠加冕', anim: 'reward-crown' },
+    { emoji: '🎊🎈', name: '气球派对', anim: 'reward-balloon' },
+    { emoji: '🐼🎋', name: '熊猫打滚', anim: 'reward-panda' },
+    { emoji: '🦖🎸', name: '恐龙摇滚', anim: 'reward-dino' },
+    { emoji: '🍩🍭', name: '糖果雨', anim: 'reward-candy' }
+  ];
+  const reward = rewards[Math.floor(Math.random() * rewards.length)];
+  
+  // 随机搞笑鼓励语
+  const encouragements = [
+    '你的手指比闪电还快！⚡',
+    '键盘都要被你敲冒烟了！🔥',
+    '你就是打字界的传说！👑',
+    '这速度，校长都看呆了！🎓',
+    '单词看到你都要绕道走！😎',
+    '你的手指是装了马达吗？🚀',
+    '这正确率，英语老师哭了！😭',
+    '你就是行走的单词字典！📖',
+    '这手速，去参加比赛吧！🏆',
+    '单词们已经瑟瑟发抖了！💪',
+    '你的打字速度突破天际了！🌌',
+    '这表现，必须给个大大的赞！👍'
+  ];
+  const encouragement = encouragements[Math.floor(Math.random() * encouragements.length)];
+  
+  // 计算学习统计
+  const accuracy = gs.totalKeystrokes > 0 ? Math.round(gs.correctKeystrokes / gs.totalKeystrokes * 100) : 100;
+  const learnedCount = gs.learnedWords ? gs.learnedWords.length : 0;
+  
+  // 创建过关提示
+  const overlay = document.createElement('div');
+  overlay.className = 'level-complete-overlay';
+  overlay.style.pointerEvents = 'auto';
+  overlay.innerHTML = `
+    <div class="level-complete-box">
+      <div class="level-complete-title">🎉 第 ${level} 关 通过！</div>
+      <div class="reward-animation ${reward.anim}">${reward.emoji}</div>
+      <div class="reward-name">${reward.name}</div>
+      <div class="level-encouragement">${encouragement}</div>
+      <div class="level-stats">
+        <span>📚 已学 ${learnedCount} 词</span>
+        <span>🎯 正确率 ${accuracy}%</span>
+        <span>🔥 最高连击 ${gs.maxCombo}</span>
+      </div>
+      <button class="next-level-btn" onclick="this.closest('.level-complete-overlay').remove(); loadClassicWord();">
+        🚀 进入第 ${level + 1} 关
+      </button>
+    </div>
+  `;
+  range.appendChild(overlay);
+  
+  // 创建彩带效果
+  for (let i = 0; i < 80; i++) {
+    const confetti = document.createElement('div');
+    confetti.className = 'level-confetti';
+    confetti.style.left = Math.random() * 100 + '%';
+    confetti.style.top = '-20px';
+    confetti.style.background = ['#FF6B6B', '#4ECDC4', '#FFE66D', '#95E1D3', '#F38181', '#AA96DA', '#FF9FF3', '#54A0FF'][Math.floor(Math.random() * 8)];
+    confetti.style.animationDelay = Math.random() * 0.5 + 's';
+    confetti.style.animationDuration = (1.5 + Math.random()) + 's';
+    range.appendChild(confetti);
+    setTimeout(() => { if (confetti.parentNode) confetti.parentNode.removeChild(confetti); }, 3000);
+  }
+  
+  // 播放过关音效
+  playLevelUpSound();
+  // 不再自动进入下一关，等待用户点击按钮
+}
+
+function playLevelUpSound() {
+  try {
+    if (!window.audioCtx) window.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const ctx = window.audioCtx;
+    const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+    notes.forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.frequency.value = freq;
+      osc.type = 'sine';
+      gain.gain.setValueAtTime(0, ctx.currentTime + i * 0.12);
+      gain.gain.linearRampToValueAtTime(0.2, ctx.currentTime + i * 0.12 + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + i * 0.12 + 0.3);
+      osc.start(ctx.currentTime + i * 0.12);
+      osc.stop(ctx.currentTime + i * 0.12 + 0.3);
+    });
+  } catch (e) { console.log('过关音效播放失败', e); }
+}
+
 function shuffle(arr) {
   const a = [...arr];
   for (let i = a.length - 1; i > 0; i--) {
@@ -6105,75 +6877,24 @@ function updateGunAim() {
   shotgun.style.setProperty('--gun-angle', angle + 'deg');
   shotgun.style.transform = 'translateX(-50%) rotate(' + angle + 'deg)';
   
-  // 调整枪口火焰位置
-  const muzzleFlash = $('muzzleFlash');
-  if (muzzleFlash) {
-    const barrelLength = 100;
-    const rad = angle * (Math.PI / 180);
-    const muzzleX = gunBaseX + Math.sin(rad) * barrelLength;
-    const muzzleY = gunBaseY - Math.cos(rad) * barrelLength;
-    muzzleFlash.style.left = muzzleX + 'px';
-    muzzleFlash.style.bottom = (rangeRect.height - muzzleY) + 'px';
-    muzzleFlash.style.transform = 'translateX(-50%) rotate(' + angle + 'deg)';
-  }
+  // 枪口火焰已在猎枪内部，自动跟随旋转
 }
 
 // 发射子弹：从枪口射向目标
 function fireBullet() {
-  const target = $('currentTarget');
-  const range = $('shootingRange');
-  const shotgun = $('shotgun');
-  if (!target || !range || !shotgun) return;
-  
-  const rangeRect = range.getBoundingClientRect();
-  const targetRect = target.getBoundingClientRect();
-  
-  const targetCenterX = targetRect.left - rangeRect.left + targetRect.width / 2;
-  const targetCenterY = targetRect.top - rangeRect.top + targetRect.height / 2;
-  
-  const gunBaseX = rangeRect.width / 2;
-  const gunBaseY = rangeRect.height - 20;
-  
-  // 计算枪口位置
-  const angle = parseFloat(shotgun.style.getPropertyValue('--gun-angle')) || 0;
-  const rad = angle * (Math.PI / 180);
-  const barrelLength = 100;
-  const muzzleX = gunBaseX + Math.sin(rad) * barrelLength;
-  const muzzleY = gunBaseY - Math.cos(rad) * barrelLength;
-  
-  // 创建子弹轨迹
-  const bullet = document.createElement('div');
-  bullet.className = 'bullet-trail';
-  
-  const dx = targetCenterX - muzzleX;
-  const dy = targetCenterY - muzzleY;
-  const distance = Math.sqrt(dx * dx + dy * dy);
-  const bulletAngle = Math.atan2(dy, dx) * (180 / Math.PI);
-  
-  bullet.style.left = muzzleX + 'px';
-  bullet.style.top = muzzleY + 'px';
-  bullet.style.width = distance + 'px';
-  bullet.style.transform = 'rotate(' + bulletAngle + 'deg)';
-  
-  range.appendChild(bullet);
-  
-  // 0.15秒后移除子弹
-  setTimeout(() => {
-    if (bullet.parentNode) bullet.parentNode.removeChild(bullet);
-  }, 200);
-  
-  // 显示枪口火焰
+  // 只显示枪口火焰，不显示子弹轨迹（黄色光线位置不对，已移除）
   const muzzleFlash = $('muzzleFlash');
   if (muzzleFlash) {
-    muzzleFlash.style.opacity = '1';
-    setTimeout(() => { muzzleFlash.style.opacity = '0'; }, 80);
+    muzzleFlash.classList.remove('active');
+    void muzzleFlash.offsetWidth;
+    muzzleFlash.classList.add('active');
   }
 }
 
 // 目标爆炸效果
-function explodeTarget() {
-  const target = $('currentTarget');
-  const range = $('shootingRange');
+function explodeTarget(target, range) {
+  target = target || $('currentTarget');
+  range = range || $('shootingRange');
   if (!target || !range) return;
   
   const rangeRect = range.getBoundingClientRect();
@@ -6308,8 +7029,7 @@ function classicKeyPress(key) {
     gs.maxCombo = Math.max(gs.maxCombo, gs.combo);
     gs.score += 10 + Math.min(gs.combo, 10) * 2;
     playCorrect();
-    triggerRecoil();
-    addBulletHole();
+    // 每次键入字母不开枪，只在打完整个单词时开枪
     if (gs.combo > 0 && gs.combo % 5 === 0) { playCombo(); createConfetti(15); }
     flashKey(gs.kbdContainer, key);
     gs.currentLetter++;
@@ -6368,8 +7088,7 @@ function onClassicWordComplete() {
   g.textContent = ['太棒了！', '真厉害！', '做得好！', '完美！'][Math.floor(Math.random() * 4)];
   range.appendChild(g);
   setTimeout(() => g.remove(), 1500);
-  setTimeout(() => { gs.currentIndex++; explodeTarget();
-  loadClassicWord(); }, 1200);
+  setTimeout(() => { gs.currentIndex++; loadClassicWord(); }, 1200);
 }
 
 /* ========= 消除模式 ========= */
